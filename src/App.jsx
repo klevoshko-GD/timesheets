@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { Routes, Route, NavLink, Navigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -10,7 +11,16 @@ import {
 } from '@/components/ui/select'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { Checkbox } from '@/components/ui/checkbox'
-import { XIcon, ChevronDownIcon } from 'lucide-react'
+import { XIcon, ChevronDownIcon, AlertCircleIcon, BriefcaseIcon, MapPinIcon, HashIcon } from 'lucide-react'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 /* ── Stat Card ────────────────────────────────────────────────────────────── */
 function StatCard({ label, value, sub, wide }) {
@@ -229,6 +239,89 @@ const RECON_PROJECTS = [
   },
 ]
 
+/* ── HR Employees data ───────────────────────────────────────────────────── */
+const HR_DISCREPANCY_OPTIONS = [
+  'All', 'Mixed Type', 'Missing Booking', 'Overbooking',
+  'Break of Service Mismatch', 'Billed Not Assigned', 'Assigned Not Billed',
+  'Hours mismatch', 'Break of service',
+]
+
+const HR_EMPLOYEES = [
+  {
+    id: 1, name: 'Sarah Kim', role: 'Developer', location: 'ny', rate: '$100', hours: '168', discrepancy: false, status: null,
+    tier: 'T2', projectCode: 'E1', locationLabel: 'New York, US',
+    suitProjects: { assignment: '100%', rate: '$100/h', hours: '168 h', locationLabel: 'New York, US', revenue: '$16,800' },
+    invoice:      { assignment: '100%', rate: '$100/h', hours: '168 h', locationLabel: 'New York, US', revenue: '$16,800' },
+    variance:     { assignment: '—',    rate: '—',      hours: '0 h',   revenue: '$0' },
+    workingDays: 21, clientHours: '168 h', estRevenue: '$16,800',
+    activity: [
+      { color: '#0069b4', text: 'Invoice uploaded by M. Klokov', time: 'Mar 31, 16:42' },
+      { color: '#9e9e9e', text: 'SPP timesheets locked for March 2026', time: 'Mar 31, 12:05' },
+    ],
+    assignees: [
+      { initials: 'MK', name: 'Mikhail Klokov', color: '#1a56db' },
+      { initials: 'AN', name: 'Anna Nowak', color: '#7e3af2' },
+    ],
+  },
+  {
+    id: 2, name: 'David Rayan', role: 'UI Designer', location: 'remote', rate: '$90', hours: '160', discrepancy: true, status: 'Hours mismatch',
+    tier: 'T3', projectCode: 'E2', locationLabel: 'Berlin, DE',
+    suitProjects: { assignment: '100%', rate: '$90/h',  hours: '160 h', locationLabel: 'Berlin, DE', revenue: '$14,400' },
+    invoice:      { assignment: '100%', rate: '$100/h', hours: '168 h', locationLabel: 'Berlin, DE', revenue: '$16,800' },
+    variance:     { assignment: '—',    rate: '+$10',   hours: '+8 h',  revenue: '+$2,400' },
+    workingDays: 22, clientHours: '168 h', estRevenue: '$14,400',
+    activity: [
+      { color: '#0069b4', text: 'Invoice uploaded by M. Klokov', time: 'Mar 31, 16:42' },
+      { color: '#9e9e9e', text: 'SPP timesheets locked for March 2026', time: 'Mar 31, 12:05' },
+      { color: '#DC2626', text: '1 discrepancy flagged on David Rayan', time: 'Mar 31, 16:43' },
+    ],
+    assignees: [
+      { initials: 'MK', name: 'Mikhail Klokov', color: '#1a56db' },
+      { initials: 'AN', name: 'Anna Nowak', color: '#7e3af2' },
+      { initials: 'TJ', name: 'Tyler Johnson', color: '#057a55' },
+      { initials: 'PS', name: 'Paulo Silva', color: '#c81e1e' },
+    ],
+  },
+  {
+    id: 3, name: 'Mike Johnson', role: 'Project Manager', location: 'ny', rate: '$80', hours: '168', discrepancy: false, status: null,
+    tier: 'T2', projectCode: 'E1', locationLabel: 'New York, US',
+    suitProjects: { assignment: '100%', rate: '$80/h',  hours: '168 h', locationLabel: 'New York, US', revenue: '$13,440' },
+    invoice:      { assignment: '100%', rate: '$80/h',  hours: '168 h', locationLabel: 'New York, US', revenue: '$13,440' },
+    variance:     { assignment: '—',    rate: '—',      hours: '0 h',   revenue: '$0' },
+    workingDays: 21, clientHours: '168 h', estRevenue: '$13,440',
+    activity: [
+      { color: '#0069b4', text: 'Invoice uploaded by M. Klokov', time: 'Mar 31, 16:42' },
+      { color: '#9e9e9e', text: 'SPP timesheets locked for March 2026', time: 'Mar 31, 12:05' },
+    ],
+    assignees: [
+      { initials: 'MK', name: 'Mikhail Klokov', color: '#1a56db' },
+      { initials: 'TJ', name: 'Tyler Johnson', color: '#057a55' },
+    ],
+  },
+  {
+    id: 4, name: 'Priya Nair', role: 'QA Engineer', location: 'remote', rate: '$80', hours: '160', discrepancy: true, status: 'Break of service',
+    tier: 'T1', projectCode: 'E3', locationLabel: 'Bangalore, IN',
+    suitProjects: { assignment: '80%',  rate: '$80/h',  hours: '160 h', locationLabel: 'Bangalore, IN', revenue: '$12,800' },
+    invoice:      { assignment: '100%', rate: '$80/h',  hours: '168 h', locationLabel: 'Bangalore, IN', revenue: '$13,440' },
+    variance:     { assignment: '+20%', rate: '—',      hours: '+8 h',  revenue: '+$640' },
+    workingDays: 22, clientHours: '168 h', estRevenue: '$12,800',
+    activity: [
+      { color: '#0069b4', text: 'Invoice uploaded by M. Klokov', time: 'Mar 31, 16:42' },
+      { color: '#9e9e9e', text: 'SPP timesheets locked for March 2026', time: 'Mar 31, 12:05' },
+      { color: '#DC2626', text: '1 discrepancy flagged on Priya Nair', time: 'Mar 31, 16:43' },
+    ],
+    assignees: [
+      { initials: 'AN', name: 'Anna Nowak', color: '#7e3af2' },
+      { initials: 'PS', name: 'Paulo Silva', color: '#c81e1e' },
+    ],
+  },
+]
+
+const STATUS_BADGE_STYLES = {
+  'Hours mismatch': { backgroundColor: '#fff7ed', color: '#c2410c', borderColor: '#fed7aa' },
+  'Break of service': { backgroundColor: '#fef2f2', color: '#DC2626', borderColor: '#fecaca' },
+}
+
 /* ── Employee Avatar ─────────────────────────────────────────────────────── */
 function EmployeeAvatar() {
   return (
@@ -254,7 +347,7 @@ function TimeBreakdownPopup({ data, onMouseEnter, onMouseLeave, onClose }) {
   const top = Math.max(10, Math.min(rect.top - 60, window.innerHeight - 320))
 
   const initials = row.name.split(' ').map(w => w[0]).join('')
-  const approverInitials = row.approvedBy.split(' ').map(w => w[0]).join('')
+  const approverInitials = row.approvedBy ? row.approvedBy.split(' ').map(w => w[0]).join('') : '?'
 
   const statusBadge = cs.dashed
     ? <span style={{ padding: '2px 10px', borderRadius: 20, border: `1.5px dashed ${cs.stroke}`, color: cs.color, fontSize: 12, fontWeight: 600 }}>{statusName}</span>
@@ -296,12 +389,12 @@ function TimeBreakdownPopup({ data, onMouseEnter, onMouseLeave, onClose }) {
         { label: 'Location', content: <span style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>{row.location}</span> },
         { label: 'Status',   content: statusBadge },
         { label: 'Rate',     content: <span style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>${row.rate}/hr</span> },
-        { label: 'Approved by', content: (
+        ...(row.approvedBy ? [{ label: 'Approved by', content: (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <div style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 10 }}>{approverInitials}</div>
             <span style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>{row.approvedBy}</span>
           </div>
-        )},
+        )}] : []),
       ].map(({ label, content }, idx, arr) => (
         <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: idx < arr.length - 1 ? 8 : 0, marginBottom: idx < arr.length - 1 ? 8 : 0, borderBottom: idx < arr.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
           <span style={{ fontSize: 12, color: '#9e9e9e' }}>{label}</span>
@@ -321,7 +414,7 @@ function DayCell({ cell, row, date, onEnter, onLeave }) {
   if (!cell) {
     const s = CELL_STYLES['weekend']
     return (
-      <td className="px-0.5" style={{ textAlign: 'center', width: '56px' }}>
+      <td style={{ textAlign: 'center', padding: '0 4px' }}>
         <div style={{ width: 40, height: 40, borderRadius: 7, backgroundColor: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: s.color, fontSize: 13, margin: '0 auto' }}>—</div>
       </td>
     )
@@ -336,7 +429,7 @@ function DayCell({ cell, row, date, onEnter, onLeave }) {
     : s.stroke ? `1.5px solid ${s.stroke}` : 'none'
 
   return (
-    <td className="px-0.5" style={{ textAlign: 'center', width: '56px' }} onMouseEnter={handleMouseEnter} onMouseLeave={onLeave}>
+    <td style={{ textAlign: 'center', padding: '0 4px' }} onMouseEnter={handleMouseEnter} onMouseLeave={onLeave}>
       <div style={{ width: 40, height: 40, borderRadius: 7, backgroundColor: s.bg, border, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, color: s.color, fontSize, margin: '0 auto', cursor: 'pointer', position: 'relative' }}>
         {displayText}
         {s.dot && <span style={{ position: 'absolute', top: 4, right: 4, width: 5, height: 5, borderRadius: '50%', backgroundColor: s.color }} />}
@@ -435,11 +528,14 @@ function ProjectGroup({ project, dayCols, onCellEnter, onCellLeave }) {
 }
 
 /* ── Reconciliation Project Group ────────────────────────────────────────── */
+const RECON_COL = { assignee: 178, source: 158, rate: 76, day: 80, hours: 60, revenue: 100 }
+
 function ReconciliationProjectGroup({ project, dayCols, onCellEnter, onCellLeave }) {
   const [expanded, setExpanded] = useState(true)
-  const bc = '#dee2e6'
-  const hdrBorder = '#e0e0e0'
+  const [hoveredKey, setHoveredKey] = useState(null)
+  const bc = '#e0e0e0'
   const N = RECON_SOURCE_NAMES.length
+  const { assignee: AW, source: SW, rate: RW, day: DW, hours: HW, revenue: VW } = RECON_COL
 
   return (
     <div style={{ border: '1px solid #d9dade', borderRadius: 6, marginBottom: 12, overflow: 'hidden', backgroundColor: '#fff' }}>
@@ -448,7 +544,7 @@ function ReconciliationProjectGroup({ project, dayCols, onCellEnter, onCellLeave
         style={{ padding: '16px 24px', borderBottom: expanded ? '1px solid #d9dade' : 'none' }}
         onClick={() => setExpanded(e => !e)}
       >
-        <span className="text-sm font-semibold" style={{ color: '#4a4a4a' }}>{project.name}</span>
+        <span style={{ fontSize: 16, fontWeight: 600, color: '#4a4a4a' }}>{project.name}</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e6e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
           style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', flexShrink: 0 }}>
           <path d="m6 9 6 6 6-6" />
@@ -458,23 +554,23 @@ function ReconciliationProjectGroup({ project, dayCols, onCellEnter, onCellLeave
         <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
           <table style={{ borderCollapse: 'collapse', fontSize: 13, width: 'max-content', minWidth: '100%' }}>
             <colgroup>
-              <col style={{ width: 190 }} />
-              <col style={{ width: 150 }} />
-              <col style={{ width: 70  }} />
-              {dayCols.map(d => <col key={d} style={{ width: 56 }} />)}
-              <col style={{ width: 68  }} />
-              <col style={{ width: 100 }} />
+              <col style={{ width: AW }} />
+              <col style={{ width: SW }} />
+              <col style={{ width: RW }} />
+              {dayCols.map(d => <col key={d} style={{ width: DW }} />)}
+              <col style={{ width: HW }} />
+              <col style={{ width: VW }} />
             </colgroup>
             <thead>
-              <tr style={{ backgroundColor: hdrBg, borderBottom: `1px solid ${hdrBorder}` }}>
-                <th style={{ ...stickyL(0,   hdrBg), textAlign:'left', padding:'8px 12px', fontWeight:600, color:'#6e6e6e', fontSize:11, textTransform:'uppercase', letterSpacing:'0.05em' }}>Assignee</th>
-                <th style={{ ...stickyL(190, hdrBg), textAlign:'left', padding:'8px 8px',  fontWeight:600, color:'#6e6e6e', fontSize:11, textTransform:'uppercase', letterSpacing:'0.05em' }}>Source</th>
-                <th style={{ ...stickyL(340, hdrBg), textAlign:'left', padding:'8px 6px',  fontWeight:600, color:'#6e6e6e', fontSize:11, textTransform:'uppercase', letterSpacing:'0.05em', borderRight:`1px solid ${hdrBorder}` }}>Rate</th>
+              <tr style={{ backgroundColor: '#fff', borderBottom: `1px solid ${bc}` }}>
+                <th style={{ ...stickyL(0,       '#fff'), textAlign: 'left',  padding: '0 8px 0 24px', height: 36, fontWeight: 600, color: '#4a4a4a', fontSize: 13 }}>Assignee</th>
+                <th style={{ ...stickyL(AW,      '#fff'), textAlign: 'left',  padding: '0 8px',         height: 36, fontWeight: 600, color: '#4a4a4a', fontSize: 13 }}>Source</th>
+                <th style={{ ...stickyL(AW+SW,   '#fff'), textAlign: 'left',  padding: '0 8px',         height: 36, fontWeight: 600, color: '#4a4a4a', fontSize: 13, borderRight: `1px solid ${bc}` }}>Rate</th>
                 {dayCols.map(d => (
-                  <th key={d} style={{ textAlign:'center', padding:'8px 2px', fontWeight:600, color:'#6e6e6e', fontSize:11, textTransform:'uppercase', letterSpacing:'0.04em', whiteSpace:'nowrap', minWidth:56 }}>{d}</th>
+                  <th key={d} style={{ textAlign: 'center', padding: '0 8px', height: 36, fontWeight: 600, color: '#4a4a4a', fontSize: 13, whiteSpace: 'nowrap', minWidth: DW }}>{d}</th>
                 ))}
-                <th style={{ ...stickyR(100, hdrBg), textAlign:'right', padding:'8px 12px', fontWeight:600, color:'#6e6e6e', fontSize:11, textTransform:'uppercase', letterSpacing:'0.05em', borderLeft:`1px solid ${hdrBorder}` }}>Hours</th>
-                <th style={{ ...stickyR(0,   hdrBg), textAlign:'right', padding:'8px 12px', fontWeight:600, color:'#6e6e6e', fontSize:11, textTransform:'uppercase', letterSpacing:'0.05em' }}>Revenue</th>
+                <th style={{ ...stickyR(VW, '#fff'), textAlign: 'right', padding: '0 12px', height: 36, fontWeight: 600, color: '#4a4a4a', fontSize: 13, borderLeft: `1px solid ${bc}` }}>Hours</th>
+                <th style={{ ...stickyR(0,  '#fff'), textAlign: 'right', padding: '0 12px', height: 36, fontWeight: 600, color: '#4a4a4a', fontSize: 13 }}>Revenue</th>
               </tr>
             </thead>
             <tbody>
@@ -485,28 +581,36 @@ function ReconciliationProjectGroup({ project, dayCols, onCellEnter, onCellLeave
                   const source = row.sources[srcName]
                   const isFirst = srcIdx === 0
                   const isLast  = srcIdx === N - 1
-                  const srcBg   = srcName === 'Variance' ? '#fffbeb' : srcName === 'Assignment %' ? '#f9fafb' : '#fff'
-                  const trBorder = isLast ? (!isLastRow ? `1px solid ${bc}` : 'none') : '1px solid #f0f0f0'
+                  const rowKey  = `${row.id}-${srcName}`
+                  const isHov   = hoveredKey === rowKey
                   const isVar   = srcName === 'Variance'
                   const isAssign = srcName === 'Assignment %'
+                  const srcBgBase = isVar ? '#fffbeb' : isAssign ? '#f9fafb' : '#fff'
+                  const srcBg   = isHov ? (isVar ? '#fff3cd' : isAssign ? '#f0f2f5' : '#f5f7fa') : srcBgBase
+                  const trBorder = isLast ? (!isLastRow ? `1px solid ${bc}` : 'none') : '1px solid #f0f0f0'
 
                   return (
-                    <tr key={`${row.id}-${srcName}`} style={{ borderBottom: trBorder, backgroundColor: srcBg }}>
+                    <tr
+                      key={rowKey}
+                      style={{ borderBottom: trBorder, backgroundColor: srcBg }}
+                      onMouseEnter={() => setHoveredKey(rowKey)}
+                      onMouseLeave={() => setHoveredKey(null)}
+                    >
                       {isFirst && (
-                        <td rowSpan={N} style={{ ...stickyL(0, assigneeBg), padding:'10px 12px', borderLeft: row.discrepancy ? '4px solid #DC2626' : '4px solid transparent', borderRight:`1px solid ${bc}`, verticalAlign:'top' }}>
-                          <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                        <td rowSpan={N} style={{ ...stickyL(0, assigneeBg), padding: '22px 8px 0 14px', borderLeft: row.discrepancy ? '4px solid #DC2626' : '4px solid transparent', borderRight: `1px solid ${bc}`, verticalAlign: 'top' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <EmployeeAvatar />
                             <div>
-                              <div style={{ fontWeight:600, color:'#4a4a4a', fontSize:13 }}>{row.name}</div>
-                              <div style={{ color:'#6e6e6e', fontSize:12 }}>{row.role}</div>
+                              <div style={{ fontWeight: 600, color: '#4a4a4a', fontSize: 13 }}>{row.name}</div>
+                              <div style={{ color: '#6e6e6e', fontSize: 12 }}>{row.role}</div>
                             </div>
                           </div>
                         </td>
                       )}
-                      <td style={{ ...stickyL(190, srcBg), padding:'6px 8px', borderRight:'1px solid #ebebeb' }}>
-                        <span style={{ fontSize:12, color: isVar ? '#92400e' : isAssign ? '#9e9e9e' : '#4a4a4a', fontWeight: isVar ? 600 : 400 }}>{srcName}</span>
+                      <td style={{ ...stickyL(AW, srcBg), padding: '12px 8px', borderRight: '1px solid #ebebeb' }}>
+                        <span style={{ fontSize: 12, color: isVar ? '#92400e' : isAssign ? '#9e9e9e' : '#4a4a4a', fontWeight: isVar ? 600 : 400 }}>{srcName}</span>
                       </td>
-                      <td style={{ ...stickyL(340, srcBg), padding:'6px 6px', color:'#4a4a4a', fontSize:13, borderRight:`1px solid ${bc}` }}>
+                      <td style={{ ...stickyL(AW+SW, srcBg), padding: '12px 8px', color: '#4a4a4a', fontSize: 13, borderRight: `1px solid ${bc}` }}>
                         {source.rate || '—'}
                       </td>
                       {dayCols.map((label, colIdx) => {
@@ -514,16 +618,16 @@ function ReconciliationProjectGroup({ project, dayCols, onCellEnter, onCellLeave
                         if (dow === 5 || dow === 6) {
                           const s = CELL_STYLES['weekend']
                           return (
-                            <td key={label} className="px-0.5" style={{ textAlign:'center', width:56 }}>
-                              <div style={{ width:40, height:40, borderRadius:7, backgroundColor:s.bg, display:'flex', alignItems:'center', justifyContent:'center', color:s.color, fontSize:13, margin:'0 auto' }}>—</div>
+                            <td key={label} style={{ textAlign: 'center', padding: '12px 4px' }}>
+                              <div style={{ width: 40, height: 40, borderRadius: 7, backgroundColor: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: s.color, fontSize: 13, margin: '0 auto' }}>—</div>
                             </td>
                           )
                         }
                         const val = source.days[label]
                         if (isAssign) {
                           return (
-                            <td key={label} style={{ textAlign:'center', width:56 }}>
-                              <div style={{ width:40, height:40, display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, color:'#4a4a4a', margin:'0 auto' }}>{val !== undefined ? val : '—'}</div>
+                            <td key={label} style={{ textAlign: 'center', padding: '12px 4px' }}>
+                              <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: '#4a4a4a', margin: '0 auto' }}>{val !== undefined ? val : '—'}</div>
                             </td>
                           )
                         }
@@ -531,21 +635,21 @@ function ReconciliationProjectGroup({ project, dayCols, onCellEnter, onCellLeave
                           const v = val !== undefined ? val : null
                           const col = v === null ? '#9e9e9e' : v < 0 ? '#DC2626' : v > 0 ? '#16a34a' : '#9e9e9e'
                           return (
-                            <td key={label} style={{ textAlign:'center', width:56 }}>
-                              <div style={{ width:40, height:40, display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight: v ? 600 : 400, color: col, margin:'0 auto' }}>
+                            <td key={label} style={{ textAlign: 'center', padding: '12px 4px' }}>
+                              <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: v ? 600 : 400, color: col, margin: '0 auto' }}>
                                 {v !== null ? (v > 0 ? `+${v}` : v < 0 ? v : '0') : '—'}
                               </div>
                             </td>
                           )
                         }
-                        if (val === undefined) return <td key={label} className="px-0.5" style={{ textAlign:'center', width:56 }}><div style={{ width:40, height:40, margin:'0 auto' }} /></td>
+                        if (val === undefined) return <td key={label} style={{ textAlign: 'center', padding: '12px 4px' }}><div style={{ width: 40, height: 40, margin: '0 auto' }} /></td>
                         return <DayCell key={label} cell={val} row={row} date={label} onEnter={onCellEnter} onLeave={onCellLeave} />
                       })}
-                      <td style={{ ...stickyR(100, srcBg), padding:'6px 12px', textAlign:'right', fontWeight:600, borderLeft:`1px solid ${bc}`,
+                      <td style={{ ...stickyR(VW, srcBg), padding: '12px', textAlign: 'right', fontWeight: 600, borderLeft: `1px solid ${bc}`,
                         color: isVar && source.hours !== null ? (source.hours < 0 ? '#DC2626' : source.hours > 0 ? '#16a34a' : '#9e9e9e') : '#4a4a4a' }}>
                         {source.hours !== null ? (isVar ? (source.hours > 0 ? `+${source.hours} h` : `${source.hours} h`) : `${source.hours} h`) : '—'}
                       </td>
-                      <td style={{ ...stickyR(0, srcBg), padding:'6px 12px', textAlign:'right', fontWeight:600,
+                      <td style={{ ...stickyR(0, srcBg), padding: '12px', textAlign: 'right', fontWeight: 600,
                         color: isVar && source.revenue !== null ? (source.revenue < 0 ? '#DC2626' : source.revenue > 0 ? '#16a34a' : '#9e9e9e') : '#4a4a4a' }}>
                         {source.revenue !== null
                           ? (isVar
@@ -708,7 +812,7 @@ function SearchableSelect({ value, onChange, options, placeholder = 'Search...',
 }
 
 /* ── Employee Multi-Select ───────────────────────────────────────────────── */
-const EMPLOYEE_OPTIONS = ['David Rayan', 'Sarah Kim']
+const EMPLOYEE_OPTIONS = ['David Rayan', 'Sarah Kim', 'Mike Johnson', 'Priya Nair']
 
 function EmployeeMultiSelect({ value, onChange }) {
   const [open, setOpen] = useState(false)
@@ -989,9 +1093,14 @@ function ReportPage({ title }) {
 
       {/* ── Stats Bar ── */}
       <div style={{ backgroundColor: '#f9fafb', padding: '16px 24px', borderBottom: '1px solid #dee2e6' }}>
-        <p className="text-sm mb-3" style={{ color: '#6e6e6e' }}>
-          {`Selected Period: ${period === 'Custom Period…' && customStart && customEnd ? `Custom Period (${formatDateDMY(customStart)} – ${formatDateDMY(customEnd)})` : (PERIOD_RANGES[period] || period)}`}
-        </p>
+        <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
+          <p className="text-sm" style={{ color: '#6e6e6e' }}>
+            {`Selected Period: ${period === 'Custom Period…' && customStart && customEnd ? `Custom Period (${formatDateDMY(customStart)} – ${formatDateDMY(customEnd)})` : (PERIOD_RANGES[period] || period)}`}
+          </p>
+          <Button variant="outline" className="h-10 px-5 font-semibold text-sm" style={{ color: '#0069b4', borderColor: '#0069b4', borderRadius: 0 }}>
+            Download results
+          </Button>
+        </div>
         <div className="flex" style={{ gap: '32px' }}>
           <StatCard label="Total Revenue" value="$542,310.00" sub="Estimated revenue is shown for reference only." wide />
           <StatCard label="Billable Time" value="5,693 h" sub="21 employees / 21" />
@@ -1001,19 +1110,19 @@ function ReportPage({ title }) {
         </div>
       </div>
 
-      {/* ── Filters Bar ── */}
-      <div className="bg-white border-b border-border" style={{ padding: '12px 24px' }}>
-        <div className="flex items-end gap-4 flex-wrap">
+      {/* ── Main Content ── */}
+      <main style={{ padding: '24px' }}>
 
+        {/* Filters */}
+        <div className="flex items-end gap-4 flex-wrap" style={{ marginBottom: 12 }}>
           <div>
             <label className="block text-xs mb-1.5" style={{ color: '#8f8f8f' }}>Period</label>
             <PeriodSelect value={period} onChange={setPeriod} customStart={customStart} customEnd={customEnd} onCustomRange={(s, e) => { setCustomStart(s); setCustomEnd(e) }} />
           </div>
-
           <div>
             <label className="block text-xs mb-1.5" style={{ color: '#8f8f8f' }}>Discrepancy</label>
             <Select value={discrepancy} onValueChange={setDiscrepancy}>
-              <SelectTrigger className="[&_svg]:!text-primary bg-white" style={{ width: '200px', height: '40px', borderRadius: '6px', fontSize: '14px', color: '#4a4a4a' }}>
+              <SelectTrigger className="[&_svg]:!text-primary" style={{ width: '200px', height: '40px', borderRadius: '6px', fontSize: '14px', color: '#4a4a4a', backgroundColor: '#fff' }}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent alignItemWithTrigger={false}>
@@ -1021,21 +1130,18 @@ function ReportPage({ title }) {
               </SelectContent>
             </Select>
           </div>
-
           <div>
             <label className="block text-xs mb-1.5" style={{ color: '#8f8f8f' }}>Employee name</label>
             <EmployeeMultiSelect value={filterEmployee} onChange={setFilterEmployee} />
           </div>
-
           <div>
             <label className="block text-xs mb-1.5" style={{ color: '#8f8f8f' }}>Rate</label>
             <RateRangeFilter min={filterRateMin} max={filterRateMax} onApply={(min, max) => { setFilterRateMin(min); setFilterRateMax(max) }} />
           </div>
-
           <div>
             <label className="block text-xs mb-1.5" style={{ color: '#8f8f8f' }}>Time Type</label>
             <Select value={filterTimeType} onValueChange={setFilterTimeType}>
-              <SelectTrigger className="[&_svg]:!text-primary bg-white" style={{ width: '180px', height: '40px', borderRadius: '6px', fontSize: '14px', color: '#4a4a4a' }}>
+              <SelectTrigger className="[&_svg]:!text-primary" style={{ width: '180px', height: '40px', borderRadius: '6px', fontSize: '14px', color: '#4a4a4a', backgroundColor: '#fff' }}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent alignItemWithTrigger={false}>
@@ -1043,57 +1149,49 @@ function ReportPage({ title }) {
               </SelectContent>
             </Select>
           </div>
-
           <button onClick={clearFilters} className="hover:opacity-70 transition-opacity" style={{ fontSize: '14px', fontWeight: 400, color: '#9e9e9e', height: '40px', textDecoration: 'underline', whiteSpace: 'nowrap' }}>
             Clear all
           </button>
-
-          <div className="ml-auto">
-            <Button variant="outline" className="h-10 px-5 font-semibold text-sm" style={{ color: '#0069b4', borderColor: '#0069b4', borderRadius: '6px' }}>
-              Download results
-            </Button>
-          </div>
-
         </div>
-      </div>
 
-      {/* ── Cell State Legend ── */}
-      <div
-        className="bg-white border-b border-border flex items-center justify-between cursor-pointer select-none hover:bg-gray-50 transition-colors"
-        style={{ padding: '12px 24px' }}
-        onClick={() => setLegendOpen(o => !o)}
-      >
-        <span className="text-sm font-medium" style={{ color: '#4a4a4a' }}>Cell State Legend</span>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e6e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-          style={{ transform: legendOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
-          <path d="m6 9 6 6 6-6" />
-        </svg>
-      </div>
-      {legendOpen && (
-        <div className="bg-white border-b border-border" style={{ padding: '10px 24px', overflowX: 'auto' }}>
-          <div className="flex items-center flex-wrap gap-x-5 gap-y-2" style={{ fontSize: 11, color: '#6e6e6e', whiteSpace: 'nowrap' }}>
-            {[
-              { t: 'approved', v: 8 }, { t: 'overtime', v: 10 }, { t: 'weekend', v: null },
-              { t: 'pto-req', v: null }, { t: 'nat-holiday', v: null }, { t: 'acc-holiday', v: null }, { t: 'no-hours', v: null },
-            ].map(({ t, v }) => {
-              const s = CELL_STYLES[t]
-              const display = s.label !== undefined ? s.label : String(v)
-              const border = s.dashed ? `1.5px dashed ${s.stroke}` : s.stroke ? `1.5px solid ${s.stroke}` : 'none'
-              return (
-                <div key={t} className="flex items-center gap-1.5">
-                  <div style={{ width: 24, height: 24, borderRadius: 5, backgroundColor: s.bg, border, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, color: s.color, fontSize: display.length >= 3 ? 8 : 11, flexShrink: 0 }}>
-                    {display}
-                  </div>
-                  <span>{CELL_NAMES[t]}</span>
-                </div>
-              )
-            })}
+        {/* Legend */}
+        <div style={{ backgroundColor: '#fff', border: '1px solid #e0e0e0', borderRadius: 6, marginBottom: 12, overflow: 'hidden' }}>
+          <div
+            className="flex items-center justify-between cursor-pointer select-none hover:bg-gray-50 transition-colors"
+            style={{ padding: '12px 16px' }}
+            onClick={() => setLegendOpen(o => !o)}
+          >
+            <span className="text-sm font-medium" style={{ color: '#4a4a4a' }}>Cell State Legend</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e6e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+              style={{ transform: legendOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
+              <path d="m6 9 6 6 6-6" />
+            </svg>
           </div>
+          {legendOpen && (
+            <div style={{ padding: '10px 16px', borderTop: '1px solid #e0e0e0', overflowX: 'auto' }}>
+              <div className="flex items-center flex-wrap gap-x-5 gap-y-2" style={{ fontSize: 11, color: '#6e6e6e', whiteSpace: 'nowrap' }}>
+                {[
+                  { t: 'approved', v: 8 }, { t: 'overtime', v: 10 }, { t: 'weekend', v: null },
+                  { t: 'pto-req', v: null }, { t: 'nat-holiday', v: null }, { t: 'acc-holiday', v: null }, { t: 'no-hours', v: null },
+                ].map(({ t, v }) => {
+                  const s = CELL_STYLES[t]
+                  const display = s.label !== undefined ? s.label : String(v)
+                  const border = s.dashed ? `1.5px dashed ${s.stroke}` : s.stroke ? `1.5px solid ${s.stroke}` : 'none'
+                  return (
+                    <div key={t} className="flex items-center gap-1.5">
+                      <div style={{ width: 24, height: 24, borderRadius: 5, backgroundColor: s.bg, border, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, color: s.color, fontSize: display.length >= 3 ? 8 : 11, flexShrink: 0 }}>
+                        {display}
+                      </div>
+                      <span>{CELL_NAMES[t]}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
-      )}
 
-      {/* ── Project Groups ── */}
-      <main style={{ padding: '24px' }}>
+        {/* Project Groups */}
         {filteredProjects.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '64px 24px', color: '#9e9e9e' }}>
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 12px' }}>
@@ -1181,10 +1279,10 @@ function ReconciliationPage() {
         <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
           <p className="text-sm" style={{ color: '#6e6e6e' }}>Selected Period: {periodLabel}</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button className="hover:opacity-70 transition-opacity" style={{ fontSize: 14, color: '#0069b4', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
+            <Button className="h-10 px-5 font-semibold text-sm" style={{ backgroundColor: '#0069b4', color: '#fff', borderRadius: 0, border: 'none' }}>
               Upload Client File
-            </button>
-            <Button variant="outline" className="h-10 px-5 font-semibold text-sm" style={{ color: '#0069b4', borderColor: '#0069b4', borderRadius: '6px' }}>
+            </Button>
+            <Button variant="outline" className="h-10 px-5 font-semibold text-sm" style={{ color: '#0069b4', borderColor: '#0069b4', borderRadius: 0 }}>
               Download results
             </Button>
           </div>
@@ -1197,9 +1295,11 @@ function ReconciliationPage() {
         </div>
       </div>
 
-      {/* ── Filters Bar ── */}
-      <div className="bg-white border-b border-border" style={{ padding: '12px 24px' }}>
-        <div className="flex items-end gap-4 flex-wrap">
+      {/* ── Main Content ── */}
+      <main style={{ padding: '24px' }}>
+
+        {/* Filters */}
+        <div className="flex items-end gap-4 flex-wrap" style={{ marginBottom: 12 }}>
           <div>
             <label className="block text-xs mb-1.5" style={{ color: '#8f8f8f' }}>Period</label>
             <PeriodSelect value={period} onChange={setPeriod} customStart={customStart} customEnd={customEnd} onCustomRange={(s, e) => { setCustomStart(s); setCustomEnd(e) }} />
@@ -1207,7 +1307,7 @@ function ReconciliationPage() {
           <div>
             <label className="block text-xs mb-1.5" style={{ color: '#8f8f8f' }}>Discrepancy</label>
             <Select value={discrepancy} onValueChange={setDiscrepancy}>
-              <SelectTrigger className="[&_svg]:!text-primary bg-white" style={{ width: '200px', height: '40px', borderRadius: '6px', fontSize: '14px', color: '#4a4a4a' }}>
+              <SelectTrigger className="[&_svg]:!text-primary" style={{ width: '200px', height: '40px', borderRadius: '6px', fontSize: '14px', color: '#4a4a4a', backgroundColor: '#fff' }}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent alignItemWithTrigger={false}>
@@ -1226,7 +1326,7 @@ function ReconciliationPage() {
           <div>
             <label className="block text-xs mb-1.5" style={{ color: '#8f8f8f' }}>Time Type</label>
             <Select value={filterTimeType} onValueChange={setFilterTimeType}>
-              <SelectTrigger className="[&_svg]:!text-primary bg-white" style={{ width: '180px', height: '40px', borderRadius: '6px', fontSize: '14px', color: '#4a4a4a' }}>
+              <SelectTrigger className="[&_svg]:!text-primary" style={{ width: '180px', height: '40px', borderRadius: '6px', fontSize: '14px', color: '#4a4a4a', backgroundColor: '#fff' }}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent alignItemWithTrigger={false}>
@@ -1238,43 +1338,43 @@ function ReconciliationPage() {
             Clear all
           </button>
         </div>
-      </div>
 
-      {/* ── Cell State Legend ── */}
-      <div
-        className="bg-white border-b border-border flex items-center justify-between cursor-pointer select-none hover:bg-gray-50 transition-colors"
-        style={{ padding: '12px 24px' }}
-        onClick={() => setLegendOpen(o => !o)}
-      >
-        <span className="text-sm font-medium" style={{ color: '#4a4a4a' }}>Cell State Legend</span>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e6e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-          style={{ transform: legendOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
-          <path d="m6 9 6 6 6-6" />
-        </svg>
-      </div>
-      {legendOpen && (
-        <div className="bg-white border-b border-border" style={{ padding: '10px 24px', overflowX: 'auto' }}>
-          <div className="flex items-center flex-wrap gap-x-5 gap-y-2" style={{ fontSize: 11, color: '#6e6e6e', whiteSpace: 'nowrap' }}>
-            {[
-              { t: 'approved', v: 8 }, { t: 'overtime', v: 10 }, { t: 'weekend', v: null },
-              { t: 'pto-req', v: null }, { t: 'nat-holiday', v: null }, { t: 'acc-holiday', v: null }, { t: 'no-hours', v: null },
-            ].map(({ t, v }) => {
-              const s = CELL_STYLES[t]
-              const display = s.label !== undefined ? s.label : String(v)
-              const border = s.dashed ? `1.5px dashed ${s.stroke}` : s.stroke ? `1.5px solid ${s.stroke}` : 'none'
-              return (
-                <div key={t} className="flex items-center gap-1.5">
-                  <div style={{ width: 24, height: 24, borderRadius: 5, backgroundColor: s.bg, border, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, color: s.color, fontSize: display.length >= 3 ? 8 : 11, flexShrink: 0 }}>{display}</div>
-                  <span>{CELL_NAMES[t]}</span>
-                </div>
-              )
-            })}
+        {/* Legend */}
+        <div style={{ backgroundColor: '#fff', border: '1px solid #e0e0e0', borderRadius: 6, marginBottom: 12, overflow: 'hidden' }}>
+          <div
+            className="flex items-center justify-between cursor-pointer select-none hover:bg-gray-50 transition-colors"
+            style={{ padding: '12px 16px' }}
+            onClick={() => setLegendOpen(o => !o)}
+          >
+            <span className="text-sm font-medium" style={{ color: '#4a4a4a' }}>Cell State Legend</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e6e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+              style={{ transform: legendOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
+              <path d="m6 9 6 6 6-6" />
+            </svg>
           </div>
+          {legendOpen && (
+            <div style={{ padding: '10px 16px', borderTop: '1px solid #e0e0e0', overflowX: 'auto' }}>
+              <div className="flex items-center flex-wrap gap-x-5 gap-y-2" style={{ fontSize: 11, color: '#6e6e6e', whiteSpace: 'nowrap' }}>
+                {[
+                  { t: 'approved', v: 8 }, { t: 'overtime', v: 10 }, { t: 'weekend', v: null },
+                  { t: 'pto-req', v: null }, { t: 'nat-holiday', v: null }, { t: 'acc-holiday', v: null }, { t: 'no-hours', v: null },
+                ].map(({ t, v }) => {
+                  const s = CELL_STYLES[t]
+                  const display = s.label !== undefined ? s.label : String(v)
+                  const border = s.dashed ? `1.5px dashed ${s.stroke}` : s.stroke ? `1.5px solid ${s.stroke}` : 'none'
+                  return (
+                    <div key={t} className="flex items-center gap-1.5">
+                      <div style={{ width: 24, height: 24, borderRadius: 5, backgroundColor: s.bg, border, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, color: s.color, fontSize: display.length >= 3 ? 8 : 11, flexShrink: 0 }}>{display}</div>
+                      <span>{CELL_NAMES[t]}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
-      )}
 
-      {/* ── Project Groups ── */}
-      <main style={{ padding: '24px' }}>
+        {/* Project Groups */}
         {filteredProjects.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '64px 24px', color: '#9e9e9e' }}>
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 12px' }}>
@@ -1293,10 +1393,417 @@ function ReconciliationPage() {
   )
 }
 
+/* ── HR Employee Group (3 rows: SuitProjects Pro / Invoice / Variance) ───── */
+/* ── HR Employee Detail Sheet ────────────────────────────────────────────── */
+function HREmployeeDetailSheet({ employee, open, onClose }) {
+  if (!employee) return null
+  const { name, role, tier, projectCode, locationLabel, status, discrepancy,
+          suitProjects, invoice, variance, workingDays, clientHours, estRevenue,
+          activity, assignees } = employee
+
+  const initials = name.split(' ').map(w => w[0]).join('')
+  const badgeStyle = status ? STATUS_BADGE_STYLES[status] : null
+
+  const AVATAR_COLORS = ['#1a56db','#7e3af2','#057a55','#c81e1e','#b45309','#0694a2']
+  const avatarBg = AVATAR_COLORS[employee.id % AVATAR_COLORS.length]
+
+  const CompareCard = ({ label, data, isVariance }) => (
+    <div style={{
+      flex: 1, border: `1.5px solid ${isVariance && discrepancy ? '#fecaca' : '#e0e0e0'}`,
+      borderRadius: 8, padding: '14px 16px',
+      backgroundColor: isVariance && discrepancy ? '#fff5f5' : '#fff',
+    }}>
+      <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
+        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#9e9e9e' }}>{label}</span>
+        {isVariance
+          ? <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#9e9e9e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          : label === 'Invoice'
+            ? <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2.5" y="1.5" width="9" height="13" rx="1" stroke="#9e9e9e" strokeWidth="1.2"/><path d="M5 5h6M5 8h6M5 11h4" stroke="#9e9e9e" strokeWidth="1.2" strokeLinecap="round"/></svg>
+            : <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="2.5" width="13" height="11" rx="1" stroke="#9e9e9e" strokeWidth="1.2"/><path d="M1.5 6h13" stroke="#9e9e9e" strokeWidth="1.2"/></svg>
+        }
+      </div>
+      {[
+        { k: 'Hours',      v: data.hours },
+        { k: 'Rate',       v: data.rate },
+        { k: 'Assignment', v: data.assignment },
+        ...(data.locationLabel ? [{ k: 'Location', v: data.locationLabel }] : []),
+        { k: 'Revenue',    v: data.revenue },
+      ].map(({ k, v }) => (
+        <div key={k} className="flex items-center justify-between" style={{ marginBottom: 8 }}>
+          <span style={{ fontSize: 13, color: '#6e6e6e' }}>{k}</span>
+          <span style={{
+            fontSize: 13, fontWeight: 600,
+            color: isVariance && discrepancy && v && v !== '—' && v !== '$0' && v !== '0 h' ? '#DC2626' : '#1a1a1a'
+          }}>{v}</span>
+        </div>
+      ))}
+    </div>
+  )
+
+  return (
+    <Sheet open={open} onOpenChange={v => { if (!v) onClose() }}>
+      <SheetContent side="right" showCloseButton={false} className="p-0 flex flex-col gap-0" style={{ width: 680, maxWidth: '90vw' }}>
+        <ScrollArea className="flex-1 h-0">
+          <div style={{ padding: '24px 24px 0' }}>
+            {/* Header */}
+            <div className="flex items-start justify-between" style={{ marginBottom: 16 }}>
+              <div className="flex items-center gap-3">
+                <div style={{ width: 48, height: 48, borderRadius: '50%', backgroundColor: avatarBg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 16, flexShrink: 0 }}>
+                  {initials}
+                </div>
+                <div>
+                  <SheetTitle style={{ fontSize: 18, fontWeight: 700, color: '#1a1a1a', marginBottom: 4 }}>{name}</SheetTitle>
+                  <div className="flex items-center gap-3" style={{ fontSize: 13, color: '#6e6e6e' }}>
+                    <span className="flex items-center gap-1"><BriefcaseIcon size={13} />{role}</span>
+                    <span className="flex items-center gap-1" style={{ color: '#9e9e9e' }}>
+                      <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="2.5" width="13" height="11" rx="1" stroke="currentColor" strokeWidth="1.2"/><path d="M1.5 6h13" stroke="currentColor" strokeWidth="1.2"/></svg>
+                      {tier}
+                    </span>
+                    <span className="flex items-center gap-1"><MapPinIcon size={13} />{locationLabel}</span>
+                    <span className="flex items-center gap-1"><HashIcon size={13} />{projectCode}</span>
+                  </div>
+                </div>
+              </div>
+              <button onClick={onClose} style={{ color: '#9e9e9e', background: 'none', border: 'none', cursor: 'pointer', padding: 4, marginTop: -2 }}>
+                <XIcon size={18} />
+              </button>
+            </div>
+
+            {/* Status badge */}
+            {badgeStyle && (
+              <div style={{ marginBottom: 16 }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 20, border: `1px solid ${badgeStyle.borderColor}`, backgroundColor: badgeStyle.backgroundColor, color: badgeStyle.color }}>
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.4"/><path d="M8 5v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><circle cx="8" cy="11.5" r="0.75" fill="currentColor"/></svg>
+                  {status}
+                </span>
+              </div>
+            )}
+
+            {/* Discrepancy alert */}
+            {discrepancy && (
+              <div style={{ backgroundColor: '#fff5f5', border: '1px solid #fecaca', borderRadius: 8, padding: '12px 14px', marginBottom: 20 }}>
+                <div className="flex items-center gap-2" style={{ marginBottom: 4 }}>
+                  <AlertCircleIcon size={16} color="#DC2626" />
+                  <span style={{ fontWeight: 700, fontSize: 14, color: '#DC2626' }}>
+                    {status}: {variance.hours !== '0 h' ? variance.hours.replace('+', '') + ' difference' : 'discrepancy found'}
+                  </span>
+                </div>
+                <p style={{ fontSize: 13, color: '#9e9e9e', marginLeft: 24 }}>
+                  SPP reports {suitProjects.hours}, client reports {invoice.hours} for March 2026. Review flagged days below.
+                </p>
+              </div>
+            )}
+
+            {/* Comparison cards */}
+            <div className="flex gap-3" style={{ marginBottom: 24 }}>
+              <CompareCard label="SPP (Internal)" data={suitProjects} isVariance={false} />
+              <CompareCard label="Invoice"         data={invoice}      isVariance={false} />
+              <CompareCard label="Variance"        data={variance}     isVariance={true} />
+            </div>
+
+            <Separator style={{ marginBottom: 20 }} />
+
+            {/* Month at a glance */}
+            <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
+              <span style={{ fontWeight: 600, fontSize: 14, color: '#1a1a1a' }}>Month at a glance</span>
+              <span style={{ fontSize: 12, color: '#9e9e9e' }}>March 2026</span>
+            </div>
+            <div className="flex gap-3" style={{ marginBottom: 24 }}>
+              {[
+                { label: 'Working Days',     value: workingDays,   red: false },
+                { label: 'SPP Hours',        value: suitProjects.hours, red: discrepancy },
+                { label: 'Client Hours',     value: clientHours,   red: false },
+                { label: 'Est. Revenue (SPP)', value: estRevenue,  red: false },
+              ].map(({ label, value, red }) => (
+                <div key={label} style={{ flex: 1, border: '1px solid #e0e0e0', borderRadius: 8, padding: '10px 12px' }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#9e9e9e', marginBottom: 6 }}>{label}</div>
+                  <div style={{ fontSize: 20, fontWeight: 700, color: red ? '#DC2626' : '#1a1a1a' }}>{value}</div>
+                </div>
+              ))}
+            </div>
+
+            <Separator style={{ marginBottom: 20 }} />
+
+            {/* Activity */}
+            <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
+              <span style={{ fontWeight: 600, fontSize: 14, color: '#1a1a1a' }}>Activity</span>
+              <span style={{ fontSize: 12, color: '#9e9e9e' }}>Last 7 days</span>
+            </div>
+            <div style={{ marginBottom: 24 }}>
+              {activity.map((item, i) => (
+                <div key={i} className="flex items-start gap-3" style={{ marginBottom: i < activity.length - 1 ? 12 : 0 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: item.color, flexShrink: 0, marginTop: 5 }} />
+                  <div>
+                    <span style={{ fontSize: 13, color: '#4a4a4a' }}>{item.text}</span>
+                    <span style={{ fontSize: 12, color: '#9e9e9e', marginLeft: 6 }}>· {item.time}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <Separator style={{ marginBottom: 20 }} />
+
+            {/* Assign to */}
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontSize: 13, color: '#6e6e6e', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5" r="3" stroke="#9e9e9e" strokeWidth="1.2"/><path d="M1 13c0-2.761 2.239-4 5-4" stroke="#9e9e9e" strokeWidth="1.2" strokeLinecap="round"/><path d="M11 9v6M8 12h6" stroke="#9e9e9e" strokeWidth="1.4" strokeLinecap="round"/></svg>
+                Assign to
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {assignees.map(a => (
+                  <div key={a.name} className="flex items-center gap-2" style={{ border: '1px solid #e0e0e0', borderRadius: 20, padding: '5px 12px 5px 6px', fontSize: 13, color: '#4a4a4a' }}>
+                    <div style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: a.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 10 }}>{a.initials}</div>
+                    {a.name}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </ScrollArea>
+
+        {/* Footer */}
+        <div style={{ borderTop: '1px solid #e0e0e0', padding: '12px 24px', display: 'flex', justifyContent: 'flex-end' }}>
+          <button onClick={onClose} style={{ height: 38, padding: '0 20px', fontSize: 14, fontWeight: 600, color: '#4a4a4a', border: '1px solid #d0d0d0', borderRadius: 4, background: '#fff', cursor: 'pointer' }}>
+            Close
+          </button>
+        </div>
+      </SheetContent>
+    </Sheet>
+  )
+}
+
+function HREmployeeGroup({ employee, isLast, onClick }) {
+  const [hovered, setHovered] = useState(false)
+  const { name, role, discrepancy, status, suitProjects, invoice, variance } = employee
+  const discBg = '#fdeded'
+  const hoverBg = discrepancy ? '#f9d8d8' : '#f5f5f5'
+  const baseBg = discrepancy ? discBg : undefined
+  const bg = hovered ? hoverBg : baseBg
+  const rowBorder = { borderBottom: `1px solid ${discrepancy ? '#f5c6c6' : '#e0e0e0'}` }
+  const lastBorder = isLast ? {} : rowBorder
+  const cell = { backgroundColor: bg, cursor: 'pointer', transition: 'background-color 0.12s' }
+  const badgeStyle = status ? STATUS_BADGE_STYLES[status] : null
+  const groupHandlers = { onMouseEnter: () => setHovered(true), onMouseLeave: () => setHovered(false), onClick }
+
+  return (
+    <>
+      <tr style={rowBorder} {...groupHandlers}>
+        <td rowSpan={3} style={{ verticalAlign: 'top', padding: '12px 8px 0 0', ...cell,
+          ...(discrepancy ? { borderLeft: '4px solid #DC2626', paddingLeft: 14 } : { paddingLeft: 24 }) }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <EmployeeAvatar />
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 13, color: '#4a4a4a' }}>{name}</div>
+              <div style={{ fontSize: 12, color: '#6e6e6e', marginTop: 2 }}>{role}</div>
+            </div>
+          </div>
+        </td>
+        <td style={{ padding: '12px 8px', fontSize: 13, color: '#4a4a4a', ...cell }}>SuitProjects Pro</td>
+        <td style={{ padding: '12px 8px', fontSize: 13, color: '#4a4a4a', ...cell }}>{suitProjects.assignment}</td>
+        <td style={{ padding: '12px 8px', fontSize: 13, color: '#4a4a4a', ...cell }}>{suitProjects.rate}</td>
+        <td style={{ padding: '12px 8px', ...cell }}>
+          {badgeStyle && (
+            <span style={{ display: 'inline-block', fontSize: 12, fontWeight: 500, padding: '3px 8px', borderRadius: 4, border: `1px solid ${badgeStyle.borderColor}`, backgroundColor: badgeStyle.backgroundColor, color: badgeStyle.color, whiteSpace: 'nowrap' }}>
+              {status}
+            </span>
+          )}
+        </td>
+        <td style={cell} />
+        <td style={{ padding: '12px 8px', fontSize: 13, fontWeight: 600, textAlign: 'right', color: discrepancy ? '#DC2626' : '#4a4a4a', ...cell }}>{suitProjects.hours}</td>
+        <td style={{ padding: '12px 8px', fontSize: 13, fontWeight: 600, textAlign: 'right', color: '#4a4a4a', ...cell }}>{suitProjects.revenue}</td>
+      </tr>
+      <tr style={rowBorder} {...groupHandlers}>
+        <td style={{ padding: '12px 8px', fontSize: 13, color: '#6e6e6e', ...cell }}>Invoice</td>
+        <td style={{ padding: '12px 8px', fontSize: 13, color: '#6e6e6e', ...cell }}>{invoice.assignment}</td>
+        <td style={{ padding: '12px 8px', fontSize: 13, color: '#6e6e6e', ...cell }}>{invoice.rate}</td>
+        <td style={cell} />
+        <td style={cell} />
+        <td style={{ padding: '12px 8px', fontSize: 13, textAlign: 'right', color: '#6e6e6e', ...cell }}>{invoice.hours}</td>
+        <td style={{ padding: '12px 8px', fontSize: 13, fontWeight: 600, textAlign: 'right', color: '#4a4a4a', ...cell }}>{invoice.revenue}</td>
+      </tr>
+      <tr style={lastBorder} {...groupHandlers}>
+        <td style={{ padding: '12px 8px', fontSize: 13, color: '#9e9e9e', ...cell }}>Variance</td>
+        <td style={{ padding: '12px 8px', fontSize: 13, color: '#9e9e9e', ...cell }}>{variance.assignment}</td>
+        <td style={{ padding: '12px 8px', fontSize: 13, color: '#9e9e9e', ...cell }}>{variance.rate}</td>
+        <td style={{ padding: '12px 8px', ...cell }}>
+          {discrepancy && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 500, color: '#DC2626' }}>
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7.5" stroke="#DC2626"/><path d="M8 4.5v4" stroke="#DC2626" strokeWidth="1.5" strokeLinecap="round"/><circle cx="8" cy="11" r="0.75" fill="#DC2626"/></svg>
+              1 issue
+            </span>
+          )}
+        </td>
+        <td style={cell} />
+        <td style={{ padding: '12px 8px', fontSize: 13, textAlign: 'right', color: '#9e9e9e', ...cell }}>{variance.hours}</td>
+        <td style={{ padding: '12px 8px', fontSize: 13, fontWeight: 600, textAlign: 'right', color: '#4a4a4a', ...cell }}>{variance.revenue}</td>
+      </tr>
+    </>
+  )
+}
+
+/* ── HR Reconciliation Page ──────────────────────────────────────────────── */
+function HRReconciliationPage() {
+  const [period, setPeriod]                 = useState('Current Month')
+  const [customStart, setCustomStart]       = useState(null)
+  const [customEnd, setCustomEnd]           = useState(null)
+  const [discrepancy, setDiscrepancy]       = useState('All')
+  const [filterEmployee, setFilterEmployee] = useState([])
+  const [filterRateMin, setFilterRateMin]   = useState('')
+  const [filterRateMax, setFilterRateMax]   = useState('')
+  const [filterTimeType, setFilterTimeType] = useState('All')
+  const [selectedEmployee, setSelectedEmployee] = useState(null)
+
+  const clearFilters = () => {
+    setDiscrepancy('All'); setFilterEmployee([]); setFilterRateMin(''); setFilterRateMax(''); setFilterTimeType('All')
+  }
+
+  const periodLabel = period === 'Custom Period…' && customStart && customEnd
+    ? `Custom Period (${formatDateDMY(customStart)} – ${formatDateDMY(customEnd)})`
+    : (PERIOD_RANGES[period] || period)
+
+  const ttFilter = parseTimeType(filterTimeType)
+
+  const HR_LOCATION_MAP = { Onsite: 'ny', Remote: 'remote' }
+
+  const visible = HR_EMPLOYEES.filter(emp => {
+    if (filterEmployee.length > 0 && !filterEmployee.includes(emp.name)) return false
+    if (discrepancy === 'With Discrepancy'    && !emp.discrepancy) return false
+    if (discrepancy === 'Without Discrepancy' &&  emp.discrepancy) return false
+    if (discrepancy !== 'All' && discrepancy !== 'With Discrepancy' && discrepancy !== 'Without Discrepancy') {
+      if (emp.status !== discrepancy) return false
+    }
+    const empRateNum = parseFloat(emp.rate.replace(/[^0-9.]/g, ''))
+    if (filterRateMin !== '' && empRateNum < Number(filterRateMin)) return false
+    if (filterRateMax !== '' && empRateNum > Number(filterRateMax)) return false
+    if (ttFilter && emp.location !== HR_LOCATION_MAP[ttFilter.location]) return false
+    return true
+  })
+
+  return (
+    <>
+      {/* ── Scope Selection ── */}
+      <div className="bg-white border-b border-border" style={{ padding: '16px 24px' }}>
+        <h1 className="text-2xl font-bold" style={{ color: '#4a4a4a' }}>HR Reconciliation</h1>
+      </div>
+
+      {/* ── Stats Bar ── */}
+      <div style={{ backgroundColor: '#f9fafb', padding: '16px 24px', borderBottom: '1px solid #dee2e6' }}>
+        <div className="flex items-center justify-between">
+          <p className="text-sm" style={{ color: '#6e6e6e' }}>Selected Period: {periodLabel}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Button className="h-10 px-5 font-semibold text-sm" style={{ backgroundColor: '#0069b4', color: '#fff', borderRadius: 0, border: 'none' }}>
+              Upload Client File
+            </Button>
+            <Button variant="outline" className="h-10 px-5 font-semibold text-sm" style={{ color: '#0069b4', borderColor: '#0069b4', borderRadius: 0 }}>
+              Download results
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Main Content ── */}
+      <main style={{ padding: '24px' }}>
+
+        {/* Filters */}
+        <div className="flex items-end gap-4 flex-wrap" style={{ marginBottom: 12 }}>
+          <div>
+            <label className="block text-xs mb-1.5" style={{ color: '#8f8f8f' }}>Period</label>
+            <PeriodSelect value={period} onChange={setPeriod} customStart={customStart} customEnd={customEnd} onCustomRange={(s, e) => { setCustomStart(s); setCustomEnd(e) }} />
+          </div>
+          <div>
+            <label className="block text-xs mb-1.5" style={{ color: '#8f8f8f' }}>Discrepancy</label>
+            <Select value={discrepancy} onValueChange={setDiscrepancy}>
+              <SelectTrigger className="[&_svg]:!text-primary" style={{ width: 200, height: 40, borderRadius: 6, fontSize: 14, color: '#4a4a4a', backgroundColor: '#fff' }}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent alignItemWithTrigger={false}>
+                {HR_DISCREPANCY_OPTIONS.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="block text-xs mb-1.5" style={{ color: '#8f8f8f' }}>Employee name</label>
+            <EmployeeMultiSelect value={filterEmployee} onChange={setFilterEmployee} />
+          </div>
+          <div>
+            <label className="block text-xs mb-1.5" style={{ color: '#8f8f8f' }}>Rate</label>
+            <RateRangeFilter min={filterRateMin} max={filterRateMax} onApply={(min, max) => { setFilterRateMin(min); setFilterRateMax(max) }} />
+          </div>
+          <div>
+            <label className="block text-xs mb-1.5" style={{ color: '#8f8f8f' }}>Time Type</label>
+            <Select value={filterTimeType} onValueChange={setFilterTimeType}>
+              <SelectTrigger className="[&_svg]:!text-primary" style={{ width: 180, height: 40, borderRadius: 6, fontSize: 14, color: '#4a4a4a', backgroundColor: '#fff' }}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent alignItemWithTrigger={false}>
+                {TIME_TYPE_OPTIONS.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <button onClick={clearFilters} className="hover:opacity-70 transition-opacity" style={{ fontSize: 14, fontWeight: 400, color: '#9e9e9e', height: 40, textDecoration: 'underline', whiteSpace: 'nowrap' }}>
+            Clear all
+          </button>
+        </div>
+
+        {/* Table */}
+        <div style={{ border: '1px solid #e0e0e0', borderRadius: 6, overflow: 'hidden', backgroundColor: '#fff' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <colgroup>
+              <col style={{ width: 245 }} />
+              <col style={{ width: 158 }} />
+              <col style={{ width: 130 }} />
+              <col style={{ width: 76 }} />
+              <col style={{ width: 160 }} />
+              <col />
+              <col style={{ width: 84 }} />
+              <col style={{ width: 100 }} />
+            </colgroup>
+            <thead>
+              <tr style={{ borderBottom: '1px solid #e0e0e0', backgroundColor: '#fff' }}>
+                <th style={{ textAlign: 'left', padding: '0 8px 0 24px', height: 36, fontWeight: 600, fontSize: 13, color: '#4a4a4a' }}>Assignee</th>
+                <th style={{ textAlign: 'left', padding: '0 8px', height: 36, fontWeight: 600, fontSize: 13, color: '#4a4a4a' }}>Source</th>
+                <th style={{ textAlign: 'left', padding: '0 8px', height: 36, fontWeight: 600, fontSize: 13, color: '#4a4a4a' }}>Assignment %</th>
+                <th style={{ textAlign: 'left', padding: '0 8px', height: 36, fontWeight: 600, fontSize: 13, color: '#4a4a4a' }}>Rate</th>
+                <th style={{ textAlign: 'left', padding: '0 8px', height: 36, fontWeight: 600, fontSize: 13, color: '#4a4a4a' }}>Status</th>
+                <th />
+                <th style={{ textAlign: 'right', padding: '0 8px', height: 36, fontWeight: 600, fontSize: 13, color: '#4a4a4a' }}>Hours</th>
+                <th style={{ textAlign: 'right', padding: '0 8px', height: 36, fontWeight: 600, fontSize: 13, color: '#4a4a4a' }}>Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              {visible.length === 0 ? (
+                <tr>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '48px 24px', color: '#9e9e9e', fontSize: 13 }}>
+                    No employees match the selected filters.
+                  </td>
+                </tr>
+              ) : (
+                visible.map((emp, i) => (
+                  <HREmployeeGroup key={emp.id} employee={emp} isLast={i === visible.length - 1} onClick={() => setSelectedEmployee(emp)} />
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </main>
+
+      <HREmployeeDetailSheet
+        employee={selectedEmployee}
+        open={!!selectedEmployee}
+        onClose={() => setSelectedEmployee(null)}
+      />
+    </>
+  )
+}
+
+const NAV_ITEMS = [
+  { path: '/time-reports',     label: 'Time Reports' },
+  { path: '/reconciliation',   label: 'Reconciliation' },
+  { path: '/hr-reconciliation', label: 'HR Reconciliation' },
+]
+
 /* ── Main App ─────────────────────────────────────────────────────────────── */
 export default function App() {
-  const [page, setPage] = useState('time-reports')
-
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f9fafb' }}>
 
@@ -1304,22 +1811,20 @@ export default function App() {
       <header className="bg-primary" style={{ height: '72px' }}>
         <div className="flex items-center justify-between px-4 h-full">
           <div className="flex items-center gap-8 h-full">
-            <a href="#" className="flex items-center shrink-0">
+            <NavLink to="/time-reports" className="flex items-center shrink-0">
               <TimesheetsLogo />
-            </a>
+            </NavLink>
             <nav className="flex items-stretch h-full">
-              {[
-                { id: 'time-reports',     label: 'Time Reports' },
-                { id: 'reconciliation',   label: 'Reconciliation' },
-                { id: 'hr-reconciliation', label: 'HR Reconciliation' },
-              ].map(({ id, label }) => (
-                <button
-                  key={id}
-                  onClick={() => setPage(id)}
-                  className={`flex items-center px-4 text-sm font-semibold transition-colors border-b-2 ${page === id ? 'text-white border-white' : 'text-white/70 border-transparent hover:text-white'}`}
+              {NAV_ITEMS.map(({ path, label }) => (
+                <NavLink
+                  key={path}
+                  to={path}
+                  className={({ isActive }) =>
+                    `flex items-center px-4 text-sm font-semibold transition-colors border-b-2 ${isActive ? 'text-white border-white' : 'text-white/70 border-transparent hover:text-white'}`
+                  }
                 >
                   {label}
-                </button>
+                </NavLink>
               ))}
             </nav>
           </div>
@@ -1343,9 +1848,12 @@ export default function App() {
         </div>
       </header>
 
-      {page === 'time-reports'      && <ReportPage title="Time reports" />}
-      {page === 'reconciliation'    && <ReconciliationPage />}
-      {page === 'hr-reconciliation' && <ReportPage title="HR Reconciliation" />}
+      <Routes>
+        <Route path="/" element={<Navigate to="/time-reports" replace />} />
+        <Route path="/time-reports" element={<ReportPage title="Time reports" />} />
+        <Route path="/reconciliation" element={<ReconciliationPage />} />
+        <Route path="/hr-reconciliation" element={<HRReconciliationPage />} />
+      </Routes>
 
     </div>
   )

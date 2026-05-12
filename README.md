@@ -1,6 +1,6 @@
-# Time Reports
+# TIMESHEETS Complete
 
-A time reporting dashboard built with React, Vite, and Tailwind CSS v4.
+A TIMESHEETS dashboard built with React, Vite, and Tailwind CSS v4.
 
 ## Setup
 
